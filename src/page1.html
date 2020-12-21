@@ -56,6 +56,11 @@
             localParticipant.on("stream-disabled", (stream) => {});
 
             meeting.on("participant-joined", (participant) => {
+                let text = document.createElement('span');
+                text.setAttribute("id", "name" + participant.id);
+                text.setAttribute("style", "color:white");
+                text.innerHTML = participant.displayName;
+                document.body.appendChild(text);
                 var apiUrl = 'http://localhost:9000/sendParticipants/' + participant.displayName;
                 fetch(apiUrl).then((data) => {
 
@@ -64,11 +69,6 @@
                     console.log(err.message);
                 })
                 participant.on("stream-enabled", (stream) => {
-                    let text = document.createElement('span');
-                    text.setAttribute("id", "name" + participant.id);
-                    text.setAttribute("style", "color:white");
-                    text.innerHTML = participant.displayName;
-                    document.body.appendChild(text);
                     if (stream.kind === "video") {
                         let video = document.createElement('video');
                         video.setAttribute("id", participant.id);
