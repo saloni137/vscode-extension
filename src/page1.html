@@ -1,0 +1,172 @@
+<html>
+
+<head>
+    <style>
+        video {
+            -webkit-transform: scaleX(-1);
+            transform: scaleX(-1);
+        }
+    </style>
+    <link rel="icon" href="Zujo-Logo-Symbol.ico" type="image/x-icon" />
+    <script src="https://sdk.zujonow.com/zujo-sdk-0.0.1.dev.min.js"></script>
+    <script>
+        ZujoSDK.config("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJpYXQiOjE2MDg1MjU1MTcsImV4cCI6MTYwODU0NzExN30.FO2d6DZ6y0E28tavxsJgj5fROqKOFLxtxVAcxOjfeCI");
+        async function fetchId() {
+            const data = await fetch("http://localhost:9000/setSession");
+            const meetingId = await data.json();
+            return meetingId.meetingId;
+            return "0000";
+        }
+        let meeting = "";
+        let localParticipant = "";
+        fetchId().then(meetingId => {
+            const id = meetingId;
+            meeting = ZujoSDK.initMeeting({
+                meetingId: id,
+                name: "saloni",
+                micEnabled: true,
+                webcamEnabled: true,
+                maxResolution: "hd"
+            });
+
+            fetch("http://localhost:9000/sendMeetingId/" + meeting.id).catch(err => {
+                console.log(err);
+            });
+
+            localParticipant = meeting.localParticipant;
+
+            localParticipant.on("stream-enabled", (stream) => {
+                if (stream.kind === "video") {
+                    let myVideo = document.createElement('video');
+                    myVideo.setAttribute("id", localParticipant.id);
+                    myVideo.setAttribute("style", "height:200px;width:200px");
+                    const myMediaStream = new MediaStream();
+                    myMediaStream.addTrack(stream.track);
+                    myVideo.srcObject = myMediaStream;
+                    myVideo.autoplay = true;
+                    document.body.appendChild(myVideo);
+                    let name = document.createElement('span');
+                    name.setAttribute("id", "name" + localParticipant.id);
+                    name.setAttribute("style", "color:white");
+                    name.innerHTML = localParticipant.displayName;
+                    document.body.appendChild(name);
+                }
+            });
+
+            localParticipant.on("stream-disabled", (stream) => {});
+
+            meeting.on("participant-joined", (participant) => {
+                var apiUrl = 'http://localhost:9000/sendParticipants/' + participant.displayName;
+                fetch(apiUrl).then((data) => {
+
+                }).catch(err => {
+                    console.log('error');
+                    console.log(err.message);
+                })
+                participant.on("stream-enabled", (stream) => {
+                    let text = document.createElement('span');
+                    text.setAttribute("id", "name" + participant.id);
+                    text.setAttribute("style", "color:white");
+                    text.innerHTML = participant.displayName;
+                    document.body.appendChild(text);
+                    if (stream.kind === "video") {
+                        let video = document.createElement('video');
+                        video.setAttribute("id", participant.id);
+                        video.setAttribute("style", "height:200px;width:200px");
+                        const mediaStream = new MediaStream();
+                        mediaStream.addTrack(stream.track);
+                        video.srcObject = mediaStream;
+                        video.autoplay = true;
+                        document.body.appendChild(video);
+                    }
+                    if (stream.kind === "audio") {
+                        var audio = document.createElement('audio');
+                        audio.setAttribute("id", participant.id);
+                        const mediaStream = new MediaStream();
+                        mediaStream.addTrack(stream.track);
+                        audio.srcObject = mediaStream;
+                        audio.autoplay = true;
+                        document.body.appendChild(audio);
+                    }
+                });
+                participant.on("stream-disabled", (stream) => {
+                    //disable audio and video
+                })
+            });
+
+            meeting.on("participant-left", (participant) => {
+                console.log("left");
+                let api = 'http://localhost:9000/removeParticipants/' + participant.displayName;
+                fetch(api).then((data) => {});
+            });
+
+
+            meeting.on("chat-message", (data) => {
+                console.log(data);
+                const text = data.text;
+                const senderId = data.senderId;
+                const senderName = data.senderName;
+                let span = document.createElement("span");
+                span.setAttribute("style", "color:white");
+                span.setAttribute("id", senderId);
+                span.innerHTML = senderName + " says " + text + "<br>";
+                document.getElementById("messages").appendChild(span);
+            })
+
+            meeting.join();
+
+
+        }).catch(err => {
+            console.log(err);
+            console.log(err.message);
+        });
+
+        function leave() {
+            meeting.leave();
+        }
+
+        function toggleVideo() {
+            let streams = localParticipant.streams;
+            for (let [key, stream] of streams) {
+                if (stream.kind === "video") {
+                    let video = document.getElementById(localParticipant.id);
+                    video.style.display = "none";
+                    meeting.disableWebcam();
+                } else if (stream.kind !== "video") {
+                    meeting.enableWebcam();
+                }
+            }
+        }
+
+        function toggleAudio() {
+            let streams = localParticipant.streams;
+            for (let [key, stream] of streams) {
+                if (stream.kind === "audio") {
+                    meeting.muteMic();
+                } else if (stream.kind !== "audio") {
+                    meeting.unmuteMic();
+                }
+            }
+        }
+
+        function sendMessage() {
+            let message = document.getElementById("message").value;
+            meeting.sendChatMessage(message);
+            document.getElementById("message").value = "";
+        }
+    </script>
+</head>
+
+<body>
+    <button id="leave" onclick="leave()">Leave </button>
+    <button id="mic" onclick="toggleAudio()">Mic</button>
+    <button id="vvideo" onclick="toggleVideo()">Video</button>
+    <input type="text" placeholder="Enter message" id="message" />
+    <button onclick="sendMessage()">Chat</button>
+    <br>
+    <div id="messages">
+        <h4>Messages</h4>
+    </div>
+</body>
+
+</html>

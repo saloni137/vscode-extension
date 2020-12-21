@@ -1,0 +1,30 @@
+<html>
+
+<head>
+    <script src="https://sdk.zujonow.com/zujo-sdk-0.0.1.dev.min.js"></script>
+    <script>
+        ZujoSDK.config("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJpYXQiOjE2MDg1MjU1MTcsImV4cCI6MTYwODU0NzExN30.FO2d6DZ6y0E28tavxsJgj5fROqKOFLxtxVAcxOjfeCI");
+        let meeting = "";
+        meeting = ZujoSDK.initMeeting({
+            meetingId: "1234",
+            name: "saloni",
+            micEnabled: true,
+            webcamEnabled: true,
+            maxResolution: "hd"
+        });
+        meeting.join();
+    </script>
+</head>
+
+<body>
+    <button id="chat" onclick="sendChat()">Chat</button>
+
+    <script>
+        function sendChat() {
+            console.log("hello");
+            meeting.sendChatMessage("hello");
+        }
+    </script>
+</body>
+
+</html>

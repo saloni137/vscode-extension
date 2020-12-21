@@ -1,0 +1,76 @@
+{
+    "name": "zujo-call",
+    "description": "Call your team-mates",
+    "version": "0.0.1",
+    "publisher": "saloni",
+    "engines": {
+        "vscode": "^1.47.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onView:zujoCall",
+        "onCommand:meeting.start",
+        "onCommand:meeting.join",
+        "onCommand:chat"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "commands": [{
+                "command": "meeting.start",
+                "title": "Zujo Now",
+                "category": "zujoCall"
+            },
+            {
+                "command": "meeting.join",
+                "title": "Join the meeting",
+                "category": "zujoCall"
+            }
+        ],
+        "viewsWelcome": [{
+            "view": "zujoCall",
+            "contents": "Join the Meeting\n[Join Meeting](command:meeting.join)\nStart the Meeeting\n[Start Meeting](command:meeting.start)"
+        }],
+        "views": {
+            "zujo-call": [{
+                    "id": "zujoCall",
+                    "name": "Zujo Call",
+                    "contextualTitle": "Participants"
+                },
+                {
+                    "id": "meetInfo",
+                    "name": "Meeting Information",
+                    "contextualTitle": "Meeting Information"
+                }
+            ]
+        },
+        "viewsContainers": {
+            "activitybar": [{
+                "id": "zujo-call",
+                "title": "Zujo Now",
+                "icon": "Zujo-Logo-Symbol.svg"
+            }]
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "lint": "eslint . --ext .ts,.tsx",
+        "watch": "tsc -w -p ./"
+    },
+    "dependencies": {
+        "@types/cors": "^2.8.9",
+        "cors": "^2.8.5",
+        "express": "^4.17.1",
+        "videojs": "^1.0.0"
+    },
+    "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^3.0.2",
+        "@typescript-eslint/parser": "^3.0.2",
+        "eslint": "^7.1.0",
+        "typescript": "^4.0.2",
+        "@types/vscode": "^1.47.0",
+        "@types/node": "^12.12.0"
+    }
+}
