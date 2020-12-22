@@ -17,7 +17,8 @@
     ],
     "main": "./out/extension.js",
     "contributes": {
-        "commands": [{
+        "commands": [
+            {
                 "command": "meeting.start",
                 "title": "Zujo Now",
                 "category": "zujoCall"
@@ -28,12 +29,15 @@
                 "category": "zujoCall"
             }
         ],
-        "viewsWelcome": [{
-            "view": "zujoCall",
-            "contents": "Join the Meeting\n[Join Meeting](command:meeting.join)\nStart the Meeeting\n[Start Meeting](command:meeting.start)"
-        }],
+        "viewsWelcome": [
+            {
+                "view": "zujoCall",
+                "contents": "Join the Meeting\n[Join Meeting](command:meeting.join)\nStart the Meeeting\n[Start Meeting](command:meeting.start)"
+            }
+        ],
         "views": {
-            "zujo-call": [{
+            "zujo-call": [
+                {
                     "id": "zujoCall",
                     "name": "Zujo Call",
                     "contextualTitle": "Participants"
@@ -51,11 +55,13 @@
             ]
         },
         "viewsContainers": {
-            "activitybar": [{
-                "id": "zujo-call",
-                "title": "Zujo Now",
-                "icon": "Zujo-Logo-Symbol.svg"
-            }]
+            "activitybar": [
+                {
+                    "id": "zujo-call",
+                    "title": "Zujo Now",
+                    "icon": "Zujo-Logo-Symbol.svg"
+                }
+            ]
         }
     },
     "scripts": {
@@ -66,8 +72,12 @@
     },
     "dependencies": {
         "@types/cors": "^2.8.9",
+        "@types/socket.io": "^2.1.12",
+        "@types/socket.io-parser": "^2.2.1",
+        "@types/ws": "^7.4.0",
         "cors": "^2.8.5",
         "express": "^4.17.1",
+        "socket.io": "^3.0.4",
         "videojs": "^1.0.0"
     },
     "devDependencies": {
