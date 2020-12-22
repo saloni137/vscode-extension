@@ -7,23 +7,21 @@
             transform: scaleX(-1);
         }
     </style>
-    <link rel="icon" href="Zujo-Logo-Symbol.ico" type="image/x-icon" />
     <script src="https://sdk.zujonow.com/zujo-sdk-0.0.1.dev.min.js"></script>
     <script>
-        ZujoSDK.config("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJpYXQiOjE2MDg1MjU1MTcsImV4cCI6MTYwODU0NzExN30.FO2d6DZ6y0E28tavxsJgj5fROqKOFLxtxVAcxOjfeCI");
+        ZujoSDK.config("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJpYXQiOjE2MDg2MTkxMDksImV4cCI6MTYwODY0MDcwOX0.xVZbs3MUHj0NC3HIlYngGwDsM1JHBkIAv6GP1nPraAk");
         async function fetchId() {
             const data = await fetch("http://localhost:9000/setSession");
-            const meetingId = await data.json();
-            return meetingId.meetingId;
-            return "0000";
+            const meetingData = await data.json();
+            return meetingData;
         }
         let meeting = "";
         let localParticipant = "";
-        fetchId().then(meetingId => {
-            const id = meetingId;
+        fetchId().then(meetingData => {
+            const id = meetingData.meetingId;
             meeting = ZujoSDK.initMeeting({
                 meetingId: id,
-                name: "saloni",
+                name: meetingData.meetingName,
                 micEnabled: true,
                 webcamEnabled: true,
                 maxResolution: "hd"
@@ -34,6 +32,11 @@
             });
 
             localParticipant = meeting.localParticipant;
+            let localname = document.createElement('span');
+            localname.setAttribute("id", "name" + localParticipant.id);
+            localname.setAttribute("style", "color:white");
+            localname.innerHTML = localParticipant.displayName;
+            document.getElementById("myName").appendChild(localname);
 
             localParticipant.on("stream-enabled", (stream) => {
                 if (stream.kind === "video") {
@@ -44,60 +47,63 @@
                     myMediaStream.addTrack(stream.track);
                     myVideo.srcObject = myMediaStream;
                     myVideo.autoplay = true;
-                    document.body.appendChild(myVideo);
-                    let name = document.createElement('span');
-                    name.setAttribute("id", "name" + localParticipant.id);
-                    name.setAttribute("style", "color:white");
-                    name.innerHTML = localParticipant.displayName;
-                    document.body.appendChild(name);
+                    document.getElementById("myVideo").appendChild(myVideo);
                 }
             });
 
             localParticipant.on("stream-disabled", (stream) => {});
 
             meeting.on("participant-joined", (participant) => {
-                let text = document.createElement('span');
-                text.setAttribute("id", "name" + participant.id);
-                text.setAttribute("style", "color:white");
-                text.innerHTML = participant.displayName;
-                document.body.appendChild(text);
                 var apiUrl = 'http://localhost:9000/sendParticipants/' + participant.displayName;
                 fetch(apiUrl).then((data) => {
 
                 }).catch(err => {
                     console.log('error');
                     console.log(err.message);
-                })
+                });
+                let text = document.createElement('span');
+                text.setAttribute("id", "remotename" + participant.id);
+                text.setAttribute("style", "color:white");
+                text.innerHTML = participant.displayName;
+                document.getElementById("remoteArea").appendChild(text);
                 participant.on("stream-enabled", (stream) => {
                     if (stream.kind === "video") {
                         let video = document.createElement('video');
-                        video.setAttribute("id", participant.id);
+                        video.setAttribute("id", "videoid" + participant.id);
                         video.setAttribute("style", "height:200px;width:200px");
                         const mediaStream = new MediaStream();
                         mediaStream.addTrack(stream.track);
                         video.srcObject = mediaStream;
                         video.autoplay = true;
-                        document.body.appendChild(video);
+                        document.getElementById("remoteArea").appendChild(video);
                     }
                     if (stream.kind === "audio") {
                         var audio = document.createElement('audio');
-                        audio.setAttribute("id", participant.id);
+                        audio.setAttribute("id", "audioid" + participant.id);
                         const mediaStream = new MediaStream();
                         mediaStream.addTrack(stream.track);
                         audio.srcObject = mediaStream;
                         audio.autoplay = true;
-                        document.body.appendChild(audio);
+                        document.getElementById("remoteArea").appendChild(audio);
                     }
                 });
                 participant.on("stream-disabled", (stream) => {
-                    //disable audio and video
+                    if (stream.kind === "video") {
+                        document.getElementById("videoid" + participant.id).style.display = "none";
+                    }
+                    if (stream.kind === "audio") {
+                        document.getElementById("audioid" + participant.id).muted = true;
+                    }
                 })
             });
 
             meeting.on("participant-left", (participant) => {
-                console.log("left");
                 let api = 'http://localhost:9000/removeParticipants/' + participant.displayName;
                 fetch(api).then((data) => {});
+                document.getElementById("videoid" +
+                    participant.id).style.display = "none";
+                document.getElementById("audioid" + participant.id).muted = true;
+                document.getElementById("remotename" + participant.id).style.display = "none";
             });
 
 
@@ -109,7 +115,7 @@
                 let span = document.createElement("span");
                 span.setAttribute("style", "color:white");
                 span.setAttribute("id", senderId);
-                span.innerHTML = senderName + " says " + text + "<br>";
+                span.innerHTML = senderName + ": " + text + "<br>";
                 document.getElementById("messages").appendChild(span);
             })
 
@@ -158,11 +164,22 @@
 </head>
 
 <body>
-    <button id="leave" onclick="leave()">Leave </button>
-    <button id="mic" onclick="toggleAudio()">Mic</button>
-    <button id="vvideo" onclick="toggleVideo()">Video</button>
-    <input type="text" placeholder="Enter message" id="message" />
-    <button onclick="sendMessage()">Chat</button>
+
+    <div id="localArea">
+        <div id="myVideo"></div>
+        <br>
+        <div id="myName"></div>
+        <br>
+        <button id="leave" onclick="leave()">Leave </button>
+        <button id="mic" onclick="toggleAudio()">Mic</button>
+        <button id="vvideo" onclick="toggleVideo()">Video</button>
+        <input type="text" placeholder="Enter message" id="message" />
+        <button onclick="sendMessage()">Chat</button>
+    </div>
+    <br>
+    <div id="remoteArea">
+
+    </div>
     <br>
     <div id="messages">
         <h4>Messages</h4>

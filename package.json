@@ -42,6 +42,11 @@
                     "id": "meetInfo",
                     "name": "Meeting Information",
                     "contextualTitle": "Meeting Information"
+                },
+                {
+                    "id": "sidebar",
+                    "name": "Main Side bar",
+                    "type": "webview"
                 }
             ]
         },

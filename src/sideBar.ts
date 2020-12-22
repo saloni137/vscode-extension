@@ -10,9 +10,12 @@ export class Sidebar implements vscode.WebviewViewProvider {
       enableScripts: true,
     };
     const filePath: vscode.Uri = vscode.Uri.file(
-      path.join(this.extensionPath, "src", "page2.html")
+      path.join(this.extensionPath, "src", "page3.html")
     );
     webviewView.webview.html = fs.readFileSync(filePath.fsPath, "utf-8");
-    webviewView.webview.onDidReceiveMessage(async (data) => {});
+  }
+
+  public getMessage(name: string) {
+    //this.resolveWebviewView(this._view);
   }
 }

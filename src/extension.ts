@@ -10,8 +10,9 @@ import { Sidebar } from "./sideBar";
 
 let t = new TreeDataProvider();
 let m = new MeetTreeView();
-
+let s: Sidebar;
 let meetingId = "";
+let meetingName = "";
 
 app.use(cors());
 app.get("/sendParticipants/:participant", (req: any, res: any) => {
@@ -30,12 +31,10 @@ app.get("/removeParticipants/:participant", (req: any, res: any) => {
 });
 
 export function activate(context: vscode.ExtensionContext) {
-  /*context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(
-      "sidebar",
-      new Sidebar(context.extensionPath)
-    )
-  );*/
+  s = new Sidebar(context.extensionPath);
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider("sidebar", s)
+  );
   let disposable = vscode.commands.registerCommand("meeting.join", async () => {
     let meetingCode = await vscode.window.showInputBox({
       placeHolder: "Enter the meeting code",
@@ -43,8 +42,15 @@ export function activate(context: vscode.ExtensionContext) {
     if (meetingCode) {
       let path = vscode.Uri.parse("" + meetingCode);
       meetingId = path.path.replace("/", "");
-      vscode.commands.executeCommand("meeting.start");
     }
+    let name = await vscode.window.showInputBox({
+      placeHolder: "Enter Your Name",
+    });
+    if (name) {
+      let path = vscode.Uri.parse("" + name);
+      meetingName = path.path.replace("/", "");
+    }
+    vscode.commands.executeCommand("meeting.start");
   });
   let webview = vscode.commands.registerCommand("meeting.start", () => {
     const panel = vscode.window.createWebviewPanel(
@@ -66,6 +72,6 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.window.registerTreeDataProvider("meetInfo", m);
 }
 app.get("/setSession", (req: any, res: any) => {
-  return res.json({ meetingId: meetingId });
+  return res.json({ meetingId: meetingId, meetingName: meetingName });
 });
 app.listen(9000);
