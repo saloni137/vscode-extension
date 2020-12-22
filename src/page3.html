@@ -3,10 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js "></script>
+    <script>
+        let socket = io.connect("http://localhost:1000");
+        socket.on('messages', (data) => {
+            let div = document.createElement('div');
+            div.setAttribute("id", data.messages.senderId);
+            document.getElementById('messages').appendChild(div);
+            let span = document.createElement('span');
+            span.setAttribute('id', "name" + data.messages.senderId);
+            span.innerHTML = data.messages.senderName + "<br>";
+            let message = document.createElement('span');
+            message.setAttribute('id', "message" + data.messages.senderId);
+            message.innerHTML = data.messages.text + "<br>";
+            document.getElementById(data.messages.senderId).appendChild(span);
+            document.getElementById(data.messages.senderId).appendChild(message);
+        });
+    </script>
 </head>
 
 <body>
-    <h1>Chats</h1>
+    <div id="messages" style="color: white;">
+
+    </div>
+    <br>
+    <input type="text" id="message" placeholder="Enter Your Message" /><br>
+    <button id="send">Send</button>
+    <script>
+        let btn = document.getElementById("send");
+        btn.addEventListener('click', function() {
+            let message = document.getElementById("message").value;
+            socket.emit('chat', {
+                message: message
+            });
+            document.getElementById("message").value = "";
+        });
+    </script>
 </body>
 
 </html>

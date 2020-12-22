@@ -62,13 +62,20 @@ export function activate(context: vscode.ExtensionContext) {
     server.use(express.static("src"));
     server.use(cors());
     var http = require("http").Server(server);
-    let io = socket(http);
-    io.on("connection", function (socket: any) {
-      console.log("a user connected");
+    let io = socket(http, {
+      cors: {
+        origin: "*",
+      },
     });
-    http.listen(1000, function () {
-      console.log("listening on 1000");
+    io.on("connection", (socket: any) => {
+      socket.on("chat", (data: any) => {
+        io.sockets.emit("chat", data);
+      });
+      socket.on("messages", (data: any) => {
+        io.sockets.emit("messages", data);
+      });
     });
+    http.listen(1000);
   });
   let webview = vscode.commands.registerCommand("meeting.start", () => {
     const panel = vscode.window.createWebviewPanel(

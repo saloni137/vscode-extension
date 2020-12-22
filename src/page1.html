@@ -8,6 +8,13 @@
         }
     </style>
     <script src="https://sdk.zujonow.com/zujo-sdk-0.0.1.dev.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js "></script>
+    <script>
+        let socket = io.connect("http://localhost:1000");
+        socket.on('chat', function(data) {
+            sendMessage(data.message);
+        });
+    </script>
     <script>
         ZujoSDK.config("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJpYXQiOjE2MDg2NDA1MjAsImV4cCI6MTYwODY2MjEyMH0.LN7880ELTBM6rctt_ygJQTz8e5eNVj-JgdM0tm6tsqE");
         async function fetchId() {
@@ -108,7 +115,6 @@
 
 
             meeting.on("chat-message", (data) => {
-                console.log(data);
                 const text = data.text;
                 const senderId = data.senderId;
                 const senderName = data.senderName;
@@ -117,6 +123,11 @@
                 span.setAttribute("id", senderId);
                 span.innerHTML = senderName + ": " + text + "<br>";
                 document.getElementById("messages").appendChild(span);
+
+                socket.emit('messages', {
+                    messages: data
+                });
+
             })
 
             meeting.join();
@@ -155,10 +166,8 @@
             }
         }
 
-        function sendMessage() {
-            let message = document.getElementById("message").value;
+        function sendMessage(message) {
             meeting.sendChatMessage(message);
-            document.getElementById("message").value = "";
         }
     </script>
 </head>
