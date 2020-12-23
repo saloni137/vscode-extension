@@ -36,22 +36,26 @@
             "zujo-call": [{
                     "id": "welcome",
                     "name": "Welcome",
-                    "contextualTitle": "Welcome"
+                    "contextualTitle": "Welcome",
+                    "when": "config.zujonow.isMeetingActive == false"
                 },
                 {
                     "id": "zujoCall",
                     "name": "Participants",
-                    "contextualTitle": "Participants"
+                    "contextualTitle": "Participants",
+                    "when": "config.zujonow.isMeetingActive"
                 },
                 {
                     "id": "meetInfo",
                     "name": "Meeting Information",
-                    "contextualTitle": "Meeting Information"
+                    "contextualTitle": "Meeting Information",
+                    "when": "config.zujonow.isMeetingActive"
                 },
                 {
                     "id": "sidebar",
                     "name": "Main Side bar",
-                    "type": "webview"
+                    "type": "webview",
+                    "when": "config.zujonow.isMeetingActive"
                 }
             ]
         },
@@ -61,6 +65,16 @@
                 "title": "Zujo Now",
                 "icon": "Zujo-Logo-Symbol.svg"
             }]
+        },
+        "configuration": {
+            "title": "Meeting active",
+            "properties": {
+                "zujonow.isMeetingActive": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Is meeting active ?"
+                }
+            }
         }
     },
     "scripts": {

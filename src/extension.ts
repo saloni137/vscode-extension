@@ -35,7 +35,32 @@ app.get("/setSession", (req: any, res: any) => {
 });
 app.listen(9000);
 
+// sockerio server for chat
+let server = express();
+server.set("port", 1000);
+server.use(express.static("src"));
+server.use(cors());
+var http = require("http").Server(server);
+let io = socket(http, {
+  cors: {
+    origin: "*",
+  },
+});
+io.on("connection", (socket: any) => {
+  socket.on("chat", (data: any) => {
+    io.sockets.emit("chat", data);
+  });
+  socket.on("messages", (data: any) => {
+    io.sockets.emit("messages", data);
+  });
+});
+http.listen(1000);
+
 export function activate(context: vscode.ExtensionContext) {
+  vscode.workspace
+    .getConfiguration("zujonow")
+    .update("isMeetingActive", false, vscode.ConfigurationTarget.Global);
+
   let disposable = vscode.commands.registerCommand("meeting.join", async () => {
     let meetingCode = await vscode.window.showInputBox({
       placeHolder: "Enter the meeting code",
@@ -51,32 +76,10 @@ export function activate(context: vscode.ExtensionContext) {
       let path = vscode.Uri.parse("" + name);
       meetingName = path.path.replace("/", "");
     }
-    s = new Sidebar(context.extensionPath);
-    context.subscriptions.push(
-      vscode.window.registerWebviewViewProvider("sidebar", s)
-    );
-    vscode.commands.executeCommand("meeting.start");
 
-    let server = express();
-    server.set("port", 1000);
-    server.use(express.static("src"));
-    server.use(cors());
-    var http = require("http").Server(server);
-    let io = socket(http, {
-      cors: {
-        origin: "*",
-      },
-    });
-    io.on("connection", (socket: any) => {
-      socket.on("chat", (data: any) => {
-        io.sockets.emit("chat", data);
-      });
-      socket.on("messages", (data: any) => {
-        io.sockets.emit("messages", data);
-      });
-    });
-    http.listen(1000);
+    vscode.commands.executeCommand("meeting.start");
   });
+
   let webview = vscode.commands.registerCommand("meeting.start", () => {
     const panel = vscode.window.createWebviewPanel(
       "meeting",
@@ -90,9 +93,20 @@ export function activate(context: vscode.ExtensionContext) {
       path.join(context.extensionPath, "src", "page1.html")
     );
     panel.webview.html = fs.readFileSync(filePath.fsPath, "utf-8");
+
+    s = new Sidebar(context.extensionPath);
+    context.subscriptions.push(
+      vscode.window.registerWebviewViewProvider("sidebar", s)
+    );
+
+    vscode.window.registerTreeDataProvider("zujoCall", t);
+    vscode.window.registerTreeDataProvider("meetInfo", m);
+
+    vscode.workspace
+      .getConfiguration("zujonow")
+      .update("isMeetingActive", true, vscode.ConfigurationTarget.Global);
   });
+
   context.subscriptions.push(disposable);
   context.subscriptions.push(webview);
-  vscode.window.registerTreeDataProvider("zujoCall", t);
-  vscode.window.registerTreeDataProvider("meetInfo", m);
 }
