@@ -118,11 +118,11 @@
                 const text = data.text;
                 const senderId = data.senderId;
                 const senderName = data.senderName;
-                let span = document.createElement("span");
+                /*let span = document.createElement("span");
                 span.setAttribute("style", "color:white");
                 span.setAttribute("id", senderId);
                 span.innerHTML = senderName + ": " + text + "<br>";
-                document.getElementById("messages").appendChild(span);
+                document.getElementById("messages").appendChild(span);*/
                 let flag = false;
                 if (localParticipant.id === senderId) {
                     flag = true;
@@ -192,10 +192,6 @@
     <br>
     <div id="remoteArea">
 
-    </div>
-    <br>
-    <div id="messages">
-        <h4>Messages</h4>
     </div>
 </body>
 
