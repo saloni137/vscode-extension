@@ -1,7 +1,64 @@
 <html>
 
 <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
     <style>
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -60px;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+        button{
+            background-color: red;
+            color: white;
+            padding: 20px;
+            display: inline-block;
+            font-size: 10px;
+            margin: 4px 6px;
+            cursor: pointer;
+            border-radius: 70%;
+            border: none;
+        }
+           .container video{
+         
+           padding: 10px;
+           height: 600px;
+           width: 600px;
+           position: absolute;
+  
+       }
+       .container{
+           display: inline-flex;
+           flex-shrink: 1;
+           flex-basis: 50%;
+           flex-wrap: wrap;
+           position: relative;
+     
+       }
         video {
             -webkit-transform: scaleX(-1);
             transform: scaleX(-1);
@@ -10,20 +67,20 @@
     <link rel="icon" href="Zujo-Logo-Symbol.ico" type="image/x-icon" />
     <script src="https://sdk.zujonow.com/zujo-sdk-0.0.1.dev.min.js"></script>
     <script>
-        ZujoSDK.config("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJpYXQiOjE2MDg1MjU1MTcsImV4cCI6MTYwODU0NzExN30.FO2d6DZ6y0E28tavxsJgj5fROqKOFLxtxVAcxOjfeCI");
+        ZujoSDK.config("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJpYXQiOjE2MDg2OTczMTQsImV4cCI6MTYwODcxODkxNH0.TS_PVONNnIqOtq4Ls7IBdpc-YT3qk2oKNHJgkjJt-uY");
         async function fetchId() {
             const data = await fetch("http://localhost:9000/setSession");
-            const meetingId = await data.json();
-            return meetingId.meetingId;
+            const meetingData = await data.json();
+            return meetingData;
             return "0000";
         }
         let meeting = "";
         let localParticipant = "";
-        fetchId().then(meetingId => {
-            const id = meetingId;
+        fetchId().then(meetingData => {
+            const id = meetingData.meetingId;
             meeting = ZujoSDK.initMeeting({
                 meetingId: id,
-                name: "saloni",
+                name: meetingData.meetingName,
                 micEnabled: true,
                 webcamEnabled: true,
                 maxResolution: "hd"
@@ -39,12 +96,13 @@
                 if (stream.kind === "video") {
                     let myVideo = document.createElement('video');
                     myVideo.setAttribute("id", localParticipant.id);
-                    myVideo.setAttribute("style", "height:200px;width:200px");
+                    myVideo.setAttribute("style", "height:500px;width:500px");
                     const myMediaStream = new MediaStream();
                     myMediaStream.addTrack(stream.track);
                     myVideo.srcObject = myMediaStream;
                     myVideo.autoplay = true;
-                    document.body.appendChild(myVideo);
+                 //   document.body.appendChild(myVideo);
+                 document.getElementById("div1").appendChild(myVideo);
                     let name = document.createElement('span');
                     name.setAttribute("id", "name" + localParticipant.id);
                     name.setAttribute("style", "color:white");
@@ -56,6 +114,12 @@
             localParticipant.on("stream-disabled", (stream) => {});
 
             meeting.on("participant-joined", (participant) => {
+                    let text = document.createElement('span');
+                text.setAttribute("id", "name" + participant.id);
+                text.setAttribute("style", "color:white");
+                text.innerHTML = participant.displayName;
+                document.body.appendChild(text);
+                    
                 var apiUrl = 'http://localhost:9000/sendParticipants/' + participant.displayName;
                 fetch(apiUrl).then((data) => {
 
@@ -64,20 +128,16 @@
                     console.log(err.message);
                 })
                 participant.on("stream-enabled", (stream) => {
-                    let text = document.createElement('span');
-                    text.setAttribute("id", "name" + participant.id);
-                    text.setAttribute("style", "color:white");
-                    text.innerHTML = participant.displayName;
-                    document.body.appendChild(text);
                     if (stream.kind === "video") {
                         let video = document.createElement('video');
                         video.setAttribute("id", participant.id);
-                        video.setAttribute("style", "height:200px;width:200px");
+                        video.setAttribute("style", "height:500px;width:500px");
                         const mediaStream = new MediaStream();
                         mediaStream.addTrack(stream.track);
                         video.srcObject = mediaStream;
                         video.autoplay = true;
-                        document.body.appendChild(video);
+                       // document.body.appendChild(video);
+                      document.getElementById("div1").appendChild(video);
                     }
                     if (stream.kind === "audio") {
                         var audio = document.createElement('audio');
@@ -132,8 +192,14 @@
                     let video = document.getElementById(localParticipant.id);
                     video.style.display = "none";
                     meeting.disableWebcam();
+                    document.getElementById("vvideo").innerHTML = '<i class="fas fa-video-slash" aria-hidden="true" style="font-size:20px;"></i>';
+                    document.getElementById("tooltiptext2").innerHTML="turn on camera";
+
                 } else if (stream.kind !== "video") {
                     meeting.enableWebcam();
+                 document.getElementById("vvideo").innerHTML = '<i class="fa fa-video-camera" aria-hidden="true" style="font-size:20px;"></i>';
+                 document.getElementById("tooltiptext2").innerHTML="turn off camera";
+         
                 }
             }
         }
@@ -143,8 +209,15 @@
             for (let [key, stream] of streams) {
                 if (stream.kind === "audio") {
                     meeting.muteMic();
+                 document.getElementById("mic").innerHTML = '<i class="fa fa-microphone-slash" aria-hidden="true" style="font-size:20px;"></i>';
+                 document.getElementById("tooltiptext1").innerHTML = "unmute";
+
+
                 } else if (stream.kind !== "audio") {
                     meeting.unmuteMic();
+                     document.getElementById("mic").innerHTML ='<i class="fa fa-microphone" aria-hidden="true" style="font-size:20px;"></i>';
+                    document.getElementById("tooltiptext1").innerHTML = "mute";
+
                 }
             }
         }
@@ -158,15 +231,25 @@
 </head>
 
 <body>
-    <button id="leave" onclick="leave()">Leave </button>
-    <button id="mic" onclick="toggleAudio()">Mic</button>
-    <button id="vvideo" onclick="toggleVideo()">Video</button>
-    <input type="text" placeholder="Enter message" id="message" />
-    <button onclick="sendMessage()">Chat</button>
-    <br>
-    <div id="messages">
-        <h4>Messages</h4>
+    <div class="container" id="div1"></div>
+  
+    <div id="videoDisp" style="  position: absolute;
+      bottom: 5px;margin-left: 350px;">
+        <div class="tooltip">
+       <button id="leave" class="tooleave" onclick="leave()"><i class="fa fa-phone" aria-hidden="true" style="font-size:20px;"></i></button>
+       <span class="tooltiptext">leave meeting</span>
+        </div>
+<div class="tooltip">
+    <button id="mic" onclick="toggleAudio()"><i class="fa fa-microphone" aria-hidden="true" style="font-size:20px;"></i></button>
+<span class="tooltiptext" id="tooltiptext1">mute</span>
+</div>
+<div class="tooltip">
+<button id="vvideo" onclick="toggleVideo()"><i class="fa fa-video-camera" aria-hidden="true" style="font-size:20px;"></i></button>
+<span class="tooltiptext" id="tooltiptext2">turn on camera</span>
+</div>
     </div>
+   </div>
+    
 </body>
 
 </html>

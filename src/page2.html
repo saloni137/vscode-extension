@@ -1,30 +1,106 @@
+
+<!DOCTYPE html>
 <html>
 
 <head>
-    <script src="https://sdk.zujonow.com/zujo-sdk-0.0.1.dev.min.js"></script>
-    <script>
-        ZujoSDK.config("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJpYXQiOjE2MDg1MjU1MTcsImV4cCI6MTYwODU0NzExN30.FO2d6DZ6y0E28tavxsJgj5fROqKOFLxtxVAcxOjfeCI");
-        let meeting = "";
-        meeting = ZujoSDK.initMeeting({
-            meetingId: "1234",
-            name: "saloni",
-            micEnabled: true,
-            webcamEnabled: true,
-            maxResolution: "hd"
-        });
-        meeting.join();
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        input[type=text] {
+  width: 70%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border: none;
+  border-bottom: 2px solid white;
+  background-color: black;
+  opacity: 0.4;
+}
+
+        body {
+            margin: 0 auto;
+            height: 10px;
+            padding: 0 20px;
+        }
+
+        .container {
+            padding: 10px;
+            margin: 10px 0;
+            height: 50px;
+        }
+
+        .darker {
+            border-color: #ccc;
+        
+        }
+
+        .container::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        .container img {
+            float: left;
+            max-width: 60px;
+            width: 10%;
+            margin-right: 20px;
+            border-radius: 50%;
+        }
+
+        .container img.right {
+            float: right;
+            margin-left: 20px;
+            margin-right: 0;
+        }
+
+        .time-right {
+            float: right;
+            color: #aaa;
+        }
+
+        .time-left {
+            float: left;
+        }
+        h4{
+            margin-top: -10px ;
+        }
+    </style>
 </head>
 
 <body>
-    <button id="chat" onclick="sendChat()">Chat</button>
-
-    <script>
-        function sendChat() {
-            console.log("hello");
-            meeting.sendChatMessage("hello");
+<script>
+    function sendMessage() {
+        let text = document.getElementById("text").value;
+        let span = document.createElement("span");
+        span.innerHTML = text + "<br>";
+        let participant="local";
+        if(participant=="local"){
+        document.getElementById("container").style.visibility="visible";      
+        document.getElementById("container").appendChild(span);
+        
+        }else{
+            document.getElementById("container").style.visibility = "visible";      
+            document.getElementById("darker").appendChild(span);
         }
-    </script>
+    }
+</script>
+    <div class="container" id="container" style="float: left;visibility: hidden;">    
+    </div>
+    <br /><br />
+    <br />
+    <br />
+<div class="container darker" id="darker" style="float:right;visibility: hidden;">
+</div>
+
+   <div id="messages" style="  position: absolute;
+  bottom: 5px;
+  right: 10px">
+       <input type="text" id="text" value="hello" style="border-bottom-color: black;">
+       <button id="send" onclick="sendMessage()"><i class="fa fa-paper-plane"></i></button>
+   </div>
+    
 </body>
 
 </html>

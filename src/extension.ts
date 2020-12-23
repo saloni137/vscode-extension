@@ -7,12 +7,13 @@ const express = require("express");
 const app = express();
 import * as cors from "cors";
 import { Sidebar } from "./sideBar";
+import { AsyncLocalStorage } from "async_hooks";
 
 let t = new TreeDataProvider();
 let m = new MeetTreeView();
 
 let meetingId = "";
-
+let meetingName = "";
 app.use(cors());
 app.get("/sendParticipants/:participant", (req: any, res: any) => {
   t.refresh(req.params.participant);
@@ -30,12 +31,12 @@ app.get("/removeParticipants/:participant", (req: any, res: any) => {
 });
 
 export function activate(context: vscode.ExtensionContext) {
-  /*context.subscriptions.push(
+  context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       "sidebar",
       new Sidebar(context.extensionPath)
     )
-  );*/
+  );
   let disposable = vscode.commands.registerCommand("meeting.join", async () => {
     let meetingCode = await vscode.window.showInputBox({
       placeHolder: "Enter the meeting code",
@@ -43,9 +44,17 @@ export function activate(context: vscode.ExtensionContext) {
     if (meetingCode) {
       let path = vscode.Uri.parse("" + meetingCode);
       meetingId = path.path.replace("/", "");
-      vscode.commands.executeCommand("meeting.start");
     }
+    let Name = await vscode.window.showInputBox({
+      placeHolder: "Enter your Name",
+    });
+    if (Name) {
+      let path = vscode.Uri.parse("" + Name);
+      meetingName = path.path.replace("/", "");
+    }
+    vscode.commands.executeCommand("meeting.start");
   });
+
   let webview = vscode.commands.registerCommand("meeting.start", () => {
     const panel = vscode.window.createWebviewPanel(
       "meeting",
@@ -65,7 +74,9 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.window.registerTreeDataProvider("zujoCall", t);
   vscode.window.registerTreeDataProvider("meetInfo", m);
 }
+
 app.get("/setSession", (req: any, res: any) => {
-  return res.json({ meetingId: meetingId });
+  return res.json({ meetingId: meetingId, meetingName: meetingName });
 });
+
 app.listen(9000);
