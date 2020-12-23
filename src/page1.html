@@ -11,12 +11,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js "></script>
     <script>
         let socket = io.connect("http://localhost:1000");
-        socket.on('chat', function(data) {
+        socket.on("chat", function(data) {
             sendMessage(data.message);
         });
     </script>
     <script>
-        ZujoSDK.config("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJpYXQiOjE2MDg2OTczMTQsImV4cCI6MTYwODcxODkxNH0.TS_PVONNnIqOtq4Ls7IBdpc-YT3qk2oKNHJgkjJt-uY");
+        ZujoSDK.config(
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJpYXQiOjE2MDg3MjExNTcsImV4cCI6MTYwODc0Mjc1N30.uGlBH7Frd39y5oLxko7dmqYGkrKkeHNrsGRuClk_67Q"
+        );
         async function fetchId() {
             const data = await fetch("http://localhost:9000/setSession");
             const meetingData = await data.json();
@@ -24,123 +26,133 @@
         }
         let meeting = "";
         let localParticipant = "";
-        fetchId().then(meetingData => {
-            const id = meetingData.meetingId;
-            meeting = ZujoSDK.initMeeting({
-                meetingId: id,
-                name: meetingData.meetingName,
-                micEnabled: true,
-                webcamEnabled: true,
-                maxResolution: "hd"
-            });
-
-            fetch("http://localhost:9000/sendMeetingId/" + meeting.id).catch(err => {
-                console.log(err);
-            });
-
-            localParticipant = meeting.localParticipant;
-            let localname = document.createElement('span');
-            localname.setAttribute("id", "name" + localParticipant.id);
-            localname.setAttribute("style", "color:white");
-            localname.innerHTML = localParticipant.displayName;
-            document.getElementById("myName").appendChild(localname);
-
-            localParticipant.on("stream-enabled", (stream) => {
-                if (stream.kind === "video") {
-                    let myVideo = document.createElement('video');
-                    myVideo.setAttribute("id", localParticipant.id);
-                    myVideo.setAttribute("style", "height:200px;width:200px");
-                    const myMediaStream = new MediaStream();
-                    myMediaStream.addTrack(stream.track);
-                    myVideo.srcObject = myMediaStream;
-                    myVideo.autoplay = true;
-                    document.getElementById("myVideo").appendChild(myVideo);
-                }
-            });
-
-            localParticipant.on("stream-disabled", (stream) => {});
-
-            meeting.on("participant-joined", (participant) => {
-                var apiUrl = 'http://localhost:9000/sendParticipants/' + participant.displayName;
-                fetch(apiUrl).then((data) => {
-
-                }).catch(err => {
-                    console.log('error');
-                    console.log(err.message);
+        fetchId()
+            .then((meetingData) => {
+                const id = meetingData.meetingId;
+                meeting = ZujoSDK.initMeeting({
+                    meetingId: id,
+                    name: meetingData.meetingName,
+                    micEnabled: true,
+                    webcamEnabled: true,
+                    maxResolution: "hd",
                 });
-                let text = document.createElement('span');
-                text.setAttribute("id", "remotename" + participant.id);
-                text.setAttribute("style", "color:white");
-                text.innerHTML = participant.displayName;
-                document.getElementById("remoteArea").appendChild(text);
-                participant.on("stream-enabled", (stream) => {
+
+                fetch("http://localhost:9000/sendMeetingId/" + meeting.id).catch(
+                    (err) => {
+                        console.log(err);
+                    }
+                );
+
+                localParticipant = meeting.localParticipant;
+                let localname = document.createElement("span");
+                localname.setAttribute("id", "name" + localParticipant.id);
+                localname.setAttribute("style", "color:white");
+                localname.innerHTML = localParticipant.displayName;
+                document.getElementById("myName").appendChild(localname);
+
+                localParticipant.on("stream-enabled", (stream) => {
                     if (stream.kind === "video") {
-                        let video = document.createElement('video');
-                        video.setAttribute("id", "videoid" + participant.id);
-                        video.setAttribute("style", "height:200px;width:200px");
-                        const mediaStream = new MediaStream();
-                        mediaStream.addTrack(stream.track);
-                        video.srcObject = mediaStream;
-                        video.autoplay = true;
-                        document.getElementById("remoteArea").appendChild(video);
-                    }
-                    if (stream.kind === "audio") {
-                        var audio = document.createElement('audio');
-                        audio.setAttribute("id", "audioid" + participant.id);
-                        const mediaStream = new MediaStream();
-                        mediaStream.addTrack(stream.track);
-                        audio.srcObject = mediaStream;
-                        audio.autoplay = true;
-                        document.getElementById("remoteArea").appendChild(audio);
+                        let myVideo = document.createElement("video");
+                        myVideo.setAttribute("id", localParticipant.id);
+                        myVideo.setAttribute("style", "height:200px;width:200px");
+                        const myMediaStream = new MediaStream();
+                        myMediaStream.addTrack(stream.track);
+                        myVideo.srcObject = myMediaStream;
+                        myVideo.autoplay = true;
+                        document.getElementById("myVideo").appendChild(myVideo);
                     }
                 });
-                participant.on("stream-disabled", (stream) => {
-                    if (stream.kind === "video") {
-                        document.getElementById("videoid" + participant.id).style.display = "none";
-                    }
-                    if (stream.kind === "audio") {
-                        document.getElementById("audioid" + participant.id).muted = true;
-                    }
-                })
-            });
 
-            meeting.on("participant-left", (participant) => {
-                let api = 'http://localhost:9000/removeParticipants/' + participant.displayName;
-                fetch(api).then((data) => {});
-                document.getElementById("videoid" +
-                    participant.id).style.display = "none";
-                document.getElementById("audioid" + participant.id).muted = true;
-                document.getElementById("remotename" + participant.id).style.display = "none";
-            });
+                localParticipant.on("stream-disabled", (stream) => {});
 
-
-            meeting.on("chat-message", (data) => {
-                const text = data.text;
-                const senderId = data.senderId;
-                const senderName = data.senderName;
-                /*let span = document.createElement("span");
-                span.setAttribute("style", "color:white");
-                span.setAttribute("id", senderId);
-                span.innerHTML = senderName + ": " + text + "<br>";
-                document.getElementById("messages").appendChild(span);*/
-                let flag = false;
-                if (localParticipant.id === senderId) {
-                    flag = true;
-                }
-                socket.emit('messages', {
-                    messages: data,
-                    flag: flag
+                meeting.on("participant-joined", (participant) => {
+                    var apiUrl =
+                        "http://localhost:9000/sendParticipants/" +
+                        participant.displayName;
+                    fetch(apiUrl)
+                        .then((data) => {})
+                        .catch((err) => {
+                            console.log("error");
+                            console.log(err.message);
+                        });
+                    let text = document.createElement("span");
+                    text.setAttribute("id", "remotename" + participant.id);
+                    text.setAttribute("style", "color:white");
+                    text.innerHTML = participant.displayName;
+                    document.getElementById("remoteArea").appendChild(text);
+                    participant.on("stream-enabled", (stream) => {
+                        if (stream.kind === "video") {
+                            let video = document.createElement("video");
+                            video.setAttribute("id", "videoid" + participant.id);
+                            video.setAttribute("style", "height:200px;width:200px");
+                            const mediaStream = new MediaStream();
+                            mediaStream.addTrack(stream.track);
+                            video.srcObject = mediaStream;
+                            video.autoplay = true;
+                            document.getElementById("remoteArea").appendChild(video);
+                        }
+                        if (stream.kind === "audio") {
+                            var audio = document.createElement("audio");
+                            audio.setAttribute("id", "audioid" + participant.id);
+                            const mediaStream = new MediaStream();
+                            mediaStream.addTrack(stream.track);
+                            audio.srcObject = mediaStream;
+                            audio.autoplay = true;
+                            document.getElementById("remoteArea").appendChild(audio);
+                        }
+                    });
+                    participant.on("stream-disabled", (stream) => {
+                        if (stream.kind === "video") {
+                            document.getElementById(
+                                "videoid" + participant.id
+                            ).style.display = "none";
+                        }
+                        if (stream.kind === "audio") {
+                            document.getElementById(
+                                "audioid" + participant.id
+                            ).muted = true;
+                        }
+                    });
                 });
 
+                meeting.on("participant-left", (participant) => {
+                    let api =
+                        "http://localhost:9000/removeParticipants/" +
+                        participant.displayName;
+                    fetch(api).then((data) => {});
+                    document.getElementById("videoid" + participant.id).style.display =
+                        "none";
+                    document.getElementById("audioid" + participant.id).muted = true;
+                    document.getElementById(
+                        "remotename" + participant.id
+                    ).style.display = "none";
+                });
+
+                meeting.on("chat-message", (data) => {
+                    const text = data.text;
+                    const senderId = data.senderId;
+                    const senderName = data.senderName;
+                    /*let span = document.createElement("span");
+                                        span.setAttribute("style", "color:white");
+                                        span.setAttribute("id", senderId);
+                                        span.innerHTML = senderName + ": " + text + "<br>";
+                                        document.getElementById("messages").appendChild(span);*/
+                    let flag = false;
+                    if (localParticipant.id === senderId) {
+                        flag = true;
+                    }
+                    socket.emit("messages", {
+                        messages: data,
+                        flag: flag,
+                    });
+                });
+
+                meeting.join();
             })
-
-            meeting.join();
-
-
-        }).catch(err => {
-            console.log(err);
-            console.log(err.message);
-        });
+            .catch((err) => {
+                console.log(err);
+                console.log(err.message);
+            });
 
         function leave() {
             meeting.leave();
@@ -177,22 +189,17 @@
 </head>
 
 <body>
-
     <div id="localArea">
         <div id="myVideo"></div>
-        <br>
+        <br />
         <div id="myName"></div>
-        <br>
-        <button id="leave" onclick="leave()">Leave </button>
+        <br />
+        <button id="leave" onclick="leave()">Leave</button>
         <button id="mic" onclick="toggleAudio()">Mic</button>
         <button id="vvideo" onclick="toggleVideo()">Video</button>
-        <input type="text" placeholder="Enter message" id="message" />
-        <button onclick="sendMessage()">Chat</button>
     </div>
-    <br>
-    <div id="remoteArea">
-
-    </div>
+    <br />
+    <div id="remoteArea"></div>
 </body>
 
 </html>

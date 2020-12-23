@@ -12,20 +12,15 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
   > = this._onDidChangeTreeData.event;
 
   public refresh(name: string): void {
-    this.data.push(new TreeItem("participants", [new TreeItem(name)]));
+    this.data.push(new TreeItem(name));
     vscode.window.showInformationMessage(name + " Joined");
     this._onDidChangeTreeData.fire();
   }
 
   public removeData(name: string): void {
     for (let i = 0; i < this.data.length; i++) {
-      let childrens = this.data[i].children;
-      if (childrens) {
-        for (let j = 0; j < childrens.length; j++) {
-          if (childrens[j].label === name) {
-            childrens.splice(j, 1);
-          }
-        }
+      if (this.data[i].label === name) {
+        this.data.splice(i, 1);
       }
     }
     vscode.window.showInformationMessage(name + " Left");
