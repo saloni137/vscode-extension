@@ -16,7 +16,7 @@
         });
     </script>
     <script>
-        ZujoSDK.config("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJpYXQiOjE2MDg2NDA1MjAsImV4cCI6MTYwODY2MjEyMH0.LN7880ELTBM6rctt_ygJQTz8e5eNVj-JgdM0tm6tsqE");
+        ZujoSDK.config("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJpYXQiOjE2MDg2OTczMTQsImV4cCI6MTYwODcxODkxNH0.TS_PVONNnIqOtq4Ls7IBdpc-YT3qk2oKNHJgkjJt-uY");
         async function fetchId() {
             const data = await fetch("http://localhost:9000/setSession");
             const meetingData = await data.json();
@@ -123,9 +123,13 @@
                 span.setAttribute("id", senderId);
                 span.innerHTML = senderName + ": " + text + "<br>";
                 document.getElementById("messages").appendChild(span);
-
+                let flag = false;
+                if (localParticipant.id === senderId) {
+                    flag = true;
+                }
                 socket.emit('messages', {
-                    messages: data
+                    messages: data,
+                    flag: flag
                 });
 
             })

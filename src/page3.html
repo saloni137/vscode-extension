@@ -3,31 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js "></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .message_div {
+            position: absolute;
+            bottom: 0px;
+        }
+        
+        input[type=text] {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            width: 75%;
+            height: 35px;
+            border: 0px;
+            border-bottom: 2px solid white;
+            border-bottom-right-radius: 10px;
+        }
+        
+        button {
+            height: 35px;
+            width: 40px;
+            color: white;
+            background: #1e1e1e;
+            border: 0px;
+        }
+        
+        .container-right {
+            background: #1e1e1e;
+            width: 100%;
+            color: #d4d4d4;
+            border-bottom-right-radius: 10px;
+            margin: 5px;
+            padding: 5px;
+            float: right;
+        }
+        
+        .container-left {
+            background: #1e1e1e;
+            width: 100%;
+            color: #d4d4d4;
+            border-bottom-right-radius: 10px;
+            margin: 5px;
+            padding: 5px;
+            float: left;
+        }
+        
+        .time {
+            float: right;
+            color: #808080;
+        }
+    </style>
     <script>
         let socket = io.connect("http://localhost:1000");
         socket.on('messages', (data) => {
             let div = document.createElement('div');
-            div.setAttribute("id", data.messages.senderId);
-            document.getElementById('messages').appendChild(div);
+            div.setAttribute("id", data.messages.timestamp);
+            if (data.flag === true) {
+                div.setAttribute("class", "container-right");
+            } else {
+                div.setAttribute("class", "container-left");
+            }
+            document.getElementById("messages").appendChild(div);
             let span = document.createElement('span');
-            span.setAttribute('id', "name" + data.messages.senderId);
+            span.setAttribute('id', "name" + data.messages.timestamp);
             span.innerHTML = data.messages.senderName + "<br>";
-            let message = document.createElement('span');
-            message.setAttribute('id', "message" + data.messages.senderId);
-            message.innerHTML = data.messages.text + "<br>";
-            document.getElementById(data.messages.senderId).appendChild(span);
-            document.getElementById(data.messages.senderId).appendChild(message);
+            document.getElementById(data.messages.timestamp).appendChild(span);
+            let m_div = document.createElement('div');
+            m_div.setAttribute("id", "messages" + data.messages.timestamp);
+            document.getElementById(data.messages.timestamp).appendChild(m_div);
+            let text = document.createElement('span');
+            text.setAttribute("id", "text" + data.messages.senderId);
+            text.innerHTML = data.messages.text;
+            document.getElementById("messages" + data.messages.timestamp).appendChild(text);
+            let time = document.createElement('span');
+            time.setAttribute("id", "time" + data.messages.senderId);
+            time.setAttribute("class", "time");
+            let timestamp = data.messages.timestamp;
+            let date = new Date(timestamp);
+            let hours = date.getHours();
+            let minutes = "0" + date.getMinutes();
+            let formattedTime = hours + ':' + minutes.substr(-2);
+            time.innerHTML = formattedTime + "<br>";
+            document.getElementById("messages" + data.messages.timestamp).appendChild(time);
         });
     </script>
 </head>
 
 <body>
-    <div id="messages" style="color: white;">
+    <div id="messages">
 
     </div>
     <br>
-    <input type="text" id="message" placeholder="Enter Your Message" /><br>
-    <button id="send">Send</button>
+    <div class="message_div">
+        <input type="text" id="message" placeholder="Enter Your Message" />
+        <button id="send"><i class="fa fa-paper-plane"></i></button>
+    </div>
+
     <script>
         let btn = document.getElementById("send");
         btn.addEventListener('click', function() {
