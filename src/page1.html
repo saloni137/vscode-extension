@@ -2,6 +2,59 @@
 
 <head>
     <style>
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted black;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            /* Position the tooltip */
+            position: absolute;
+            z-index: 1;
+            bottom: 100%;
+            left: 50%;
+            margin-left: -60px;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+        }
+        
+        button {
+            background-color: red;
+            color: white;
+            padding: 20px;
+            display: inline-block;
+            font-size: 10px;
+            margin: 4px 6px;
+            cursor: pointer;
+            border-radius: 70%;
+            border: none;
+        }
+        
+        .container video {
+            padding: 10px;
+            height: 600px;
+            width: 600px;
+            position: absolute;
+        }
+        
+        .container {
+            display: inline-flex;
+            flex-shrink: 1;
+            flex-basis: 50%;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        
         video {
             -webkit-transform: scaleX(-1);
             transform: scaleX(-1);
@@ -9,6 +62,8 @@
     </style>
     <script src="https://sdk.zujonow.com/zujo-sdk-0.0.1.dev.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js "></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+
     <script>
         let socket = io.connect("http://localhost:1000");
         socket.on("chat", function(data) {
@@ -17,7 +72,7 @@
     </script>
     <script>
         ZujoSDK.config(
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJpYXQiOjE2MDg3MjExNTcsImV4cCI6MTYwODc0Mjc1N30.uGlBH7Frd39y5oLxko7dmqYGkrKkeHNrsGRuClk_67Q"
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJpYXQiOjE2MDg3ODM1OTYsImV4cCI6MTYwODgwNTE5Nn0.tubsac989CHwWNgmDzO3oXmIQTtC9TCuNpg13Tvec_o"
         );
         async function fetchId() {
             const data = await fetch("http://localhost:9000/setSession");
@@ -103,14 +158,10 @@
                     });
                     participant.on("stream-disabled", (stream) => {
                         if (stream.kind === "video") {
-                            document.getElementById(
-                                "videoid" + participant.id
-                            ).style.display = "none";
+                            document.getElementById("videoid" + participant.id).remove();
                         }
                         if (stream.kind === "audio") {
-                            document.getElementById(
-                                "audioid" + participant.id
-                            ).muted = true;
+                            document.getElementById("audioid" + participant.id).remove();
                         }
                     });
                 });
@@ -120,23 +171,16 @@
                         "http://localhost:9000/removeParticipants/" +
                         participant.displayName;
                     fetch(api).then((data) => {});
-                    document.getElementById("videoid" + participant.id).style.display =
-                        "none";
-                    document.getElementById("audioid" + participant.id).muted = true;
-                    document.getElementById(
-                        "remotename" + participant.id
-                    ).style.display = "none";
+
+                    document.getElementById("videoid" + participant.id).remove();
+                    document.getElementById("audioid" + participant.id).remove();
+                    document.getElementById("remotename" + participant.id).remove();
                 });
 
                 meeting.on("chat-message", (data) => {
                     const text = data.text;
                     const senderId = data.senderId;
                     const senderName = data.senderName;
-                    /*let span = document.createElement("span");
-                                        span.setAttribute("style", "color:white");
-                                        span.setAttribute("id", senderId);
-                                        span.innerHTML = senderName + ": " + text + "<br>";
-                                        document.getElementById("messages").appendChild(span);*/
                     let flag = false;
                     if (localParticipant.id === senderId) {
                         flag = true;
@@ -156,6 +200,7 @@
 
         function leave() {
             meeting.leave();
+            fetch("http://localhost:9000/leaveMeeting");
         }
 
         function toggleVideo() {
@@ -165,8 +210,16 @@
                     let video = document.getElementById(localParticipant.id);
                     video.style.display = "none";
                     meeting.disableWebcam();
+                    document.getElementById("vvideo").innerHTML =
+                        '<i class="fa fa-video-camera" aria-hidden="true" style="font-size:20px;"></i>';
+                    document.getElementById("tooltiptext2").innerHTML =
+                        "Turn on camera";
                 } else if (stream.kind !== "video") {
                     meeting.enableWebcam();
+                    document.getElementById("vvideo").innerHTML =
+                        '<i class="fa fa-video-camera" aria-hidden="true" style="font-size:20px;"></i>';
+                    document.getElementById("tooltiptext2").innerHTML =
+                        "Turn off camera";
                 }
             }
         }
@@ -176,8 +229,14 @@
             for (let [key, stream] of streams) {
                 if (stream.kind === "audio") {
                     meeting.muteMic();
+                    document.getElementById("mic").innerHTML =
+                        '<i class="fa fa-microphone-slash" aria-hidden="true" style="font-size:20px;"></i>';
+                    document.getElementById("tooltiptext1").innerHTML = "Unmute";
                 } else if (stream.kind !== "audio") {
                     meeting.unmuteMic();
+                    document.getElementById("mic").innerHTML =
+                        '<i class="fa fa-microphone" aria-hidden="true" style="font-size:20px;"></i>';
+                    document.getElementById("tooltiptext1").innerHTML = "Mute";
                 }
             }
         }
@@ -194,12 +253,38 @@
         <br />
         <div id="myName"></div>
         <br />
-        <button id="leave" onclick="leave()">Leave</button>
-        <button id="mic" onclick="toggleAudio()">Mic</button>
-        <button id="vvideo" onclick="toggleVideo()">Video</button>
     </div>
     <br />
     <div id="remoteArea"></div>
+
+    <div id="videoDisp" style="position: absolute; bottom: 5px; margin-left: 350px">
+        <div class="tooltip">
+            <button id="leave" class="tooleave" onclick="leave()">
+          <i class="fa fa-phone" aria-hidden="true" style="font-size: 20px"></i>
+        </button>
+            <span class="tooltiptext">leave meeting</span>
+        </div>
+        <div class="tooltip">
+            <button id="mic" onclick="toggleAudio()">
+          <i
+            class="fa fa-microphone"
+            aria-hidden="true"
+            style="font-size: 20px"
+          ></i>
+        </button>
+            <span class="tooltiptext" id="tooltiptext1">Mute</span>
+        </div>
+        <div class="tooltip">
+            <button id="vvideo" onclick="toggleVideo()">
+          <i
+            class="fa fa-video-camera"
+            aria-hidden="true"
+            style="font-size: 20px"
+          ></i>
+        </button>
+            <span class="tooltiptext" id="tooltiptext2">Turn off camera</span>
+        </div>
+    </div>
 </body>
 
 </html>

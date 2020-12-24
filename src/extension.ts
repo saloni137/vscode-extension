@@ -33,6 +33,13 @@ app.get("/removeParticipants/:participant", (req: any, res: any) => {
 app.get("/setSession", (req: any, res: any) => {
   return res.json({ meetingId: meetingId, meetingName: meetingName });
 });
+
+app.get("/leaveMeeting", (req: any, res: any) => {
+  vscode.workspace
+    .getConfiguration("zujonow")
+    .update("isMeetingActive", false, vscode.ConfigurationTarget.Global);
+});
+
 app.listen(9000);
 
 // sockerio server for chat
