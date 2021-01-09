@@ -88,7 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   let webview = vscode.commands.registerCommand("meeting.start", () => {
-    const panel = vscode.window.createWebviewPanel(
+    let panel = vscode.window.createWebviewPanel(
       "meeting",
       "ZujoNow",
       vscode.ViewColumn.One,
@@ -100,7 +100,6 @@ export function activate(context: vscode.ExtensionContext) {
       path.join(context.extensionPath, "src", "page1.html")
     );
     panel.webview.html = fs.readFileSync(filePath.fsPath, "utf-8");
-
     s = new Sidebar(context.extensionPath);
     context.subscriptions.push(
       vscode.window.registerWebviewViewProvider("sidebar", s)
@@ -117,3 +116,4 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(disposable);
   context.subscriptions.push(webview);
 }
+export function deactivate() {}

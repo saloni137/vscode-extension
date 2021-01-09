@@ -72,7 +72,7 @@
     </script>
     <script>
         ZujoSDK.config(
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJpYXQiOjE2MDg3ODM1OTYsImV4cCI6MTYwODgwNTE5Nn0.tubsac989CHwWNgmDzO3oXmIQTtC9TCuNpg13Tvec_o"
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTYxMDE3NjM2NywiZXhwIjoxNjEwMTk3OTY3fQ.f0Sp_dbG4f566MtILke3CjoRpPhzZqFUoHyUJPdidEY"
         );
         async function fetchId() {
             const data = await fetch("http://localhost:9000/setSession");
@@ -171,10 +171,11 @@
                         "http://localhost:9000/removeParticipants/" +
                         participant.displayName;
                     fetch(api).then((data) => {});
-
+                    document.getElementById(
+                        "remotename" + participant.id
+                    ).style.display = "none";
                     document.getElementById("videoid" + participant.id).remove();
                     document.getElementById("audioid" + participant.id).remove();
-                    document.getElementById("remotename" + participant.id).remove();
                 });
 
                 meeting.on("chat-message", (data) => {
@@ -201,6 +202,16 @@
         function leave() {
             meeting.leave();
             fetch("http://localhost:9000/leaveMeeting");
+            var ele = document.getElementById("localArea");
+            ele.remove();
+            var ele = document.getElementById("remoteArea");
+            ele.remove();
+
+            var x = document.createElement("span");
+            var t = document.createTextNode("Thanks for joinnig");
+            x.style.fontSize = "50px";
+            x.appendChild(t);
+            document.body.appendChild(x);
         }
 
         function toggleVideo() {
@@ -255,34 +266,38 @@
         <br />
     </div>
     <br />
-    <div id="remoteArea"></div>
-
-    <div id="videoDisp" style="position: absolute; bottom: 5px; margin-left: 350px">
-        <div class="tooltip">
-            <button id="leave" class="tooleave" onclick="leave()">
-          <i class="fa fa-phone" aria-hidden="true" style="font-size: 20px"></i>
-        </button>
-            <span class="tooltiptext">leave meeting</span>
-        </div>
-        <div class="tooltip">
-            <button id="mic" onclick="toggleAudio()">
-          <i
-            class="fa fa-microphone"
-            aria-hidden="true"
-            style="font-size: 20px"
-          ></i>
-        </button>
-            <span class="tooltiptext" id="tooltiptext1">Mute</span>
-        </div>
-        <div class="tooltip">
-            <button id="vvideo" onclick="toggleVideo()">
-          <i
-            class="fa fa-video-camera"
-            aria-hidden="true"
-            style="font-size: 20px"
-          ></i>
-        </button>
-            <span class="tooltiptext" id="tooltiptext2">Turn off camera</span>
+    <div id="remoteArea">
+        <div id="videoDisp" style="position: absolute; bottom: 5px; margin-left: 350px">
+            <div class="tooltip">
+                <button id="leave" class="tooleave" onclick="leave()">
+            <i
+              class="fa fa-phone"
+              aria-hidden="true"
+              style="font-size: 20px"
+            ></i>
+          </button>
+                <span class="tooltiptext">leave meeting</span>
+            </div>
+            <div class="tooltip">
+                <button id="mic" onclick="toggleAudio()">
+            <i
+              class="fa fa-microphone"
+              aria-hidden="true"
+              style="font-size: 20px"
+            ></i>
+          </button>
+                <span class="tooltiptext" id="tooltiptext1">Mute</span>
+            </div>
+            <div class="tooltip">
+                <button id="vvideo" onclick="toggleVideo()">
+            <i
+              class="fa fa-video-camera"
+              aria-hidden="true"
+              style="font-size: 20px"
+            ></i>
+          </button>
+                <span class="tooltiptext" id="tooltiptext2">Turn off camera</span>
+            </div>
         </div>
     </div>
 </body>
