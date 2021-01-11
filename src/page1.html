@@ -72,7 +72,7 @@
     </script>
     <script>
         ZujoSDK.config(
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTYxMDE3NjM2NywiZXhwIjoxNjEwMTk3OTY3fQ.f0Sp_dbG4f566MtILke3CjoRpPhzZqFUoHyUJPdidEY"
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiIxYTgyNjA2YS02MjcyLTQzZWItODZiYy0xYjE1OWM1ZDE2MWIiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTYxMDMzNzcxNCwiZXhwIjoxNjEwMzU5MzE0fQ.LOckkBsVzPQmT7G3SYoutSm7dxG8oICADDHsjUaQza0"
         );
         async function fetchId() {
             const data = await fetch("http://localhost:9000/setSession");
@@ -101,7 +101,7 @@
                 localParticipant = meeting.localParticipant;
                 let localname = document.createElement("span");
                 localname.setAttribute("id", "name" + localParticipant.id);
-                localname.setAttribute("style", "color:white");
+                //localname.setAttribute("style", "color:white");
                 localname.innerHTML = localParticipant.displayName;
                 document.getElementById("myName").appendChild(localname);
 
@@ -132,7 +132,7 @@
                         });
                     let text = document.createElement("span");
                     text.setAttribute("id", "remotename" + participant.id);
-                    text.setAttribute("style", "color:white");
+                    //text.setAttribute("style", "color:white");
                     text.innerHTML = participant.displayName;
                     document.getElementById("remoteArea").appendChild(text);
                     participant.on("stream-enabled", (stream) => {
@@ -208,7 +208,7 @@
             ele.remove();
 
             var x = document.createElement("span");
-            var t = document.createTextNode("Thanks for joinnig");
+            var t = document.createTextNode("Thanks for Joining");
             x.style.fontSize = "50px";
             x.appendChild(t);
             document.body.appendChild(x);
